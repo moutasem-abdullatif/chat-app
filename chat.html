@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <style>
+        .fixed-panel {
+            min-height: 500px;
+            max-height: 500px;
+            overflow-y: scroll;
+        }
+
+        #contentWrap {
+            display: none;
+        }
+
+        .private{
+            color: #3d8b40;
+            font-style: italic;
+        }
+
+    </style>
+</head>
+<body style="font-family:Verdana">
+
+
+<div class="container">
+    <div class="row " style="padding-top:40px;">
+        <div id="nickWrap">
+            <div class="col-md-4"></div>
+            <div class="col-md-4" style="padding-top: 40px">
+                <div class="panel panel-warning">
+                    <div class="panel-heading">
+                        ENTER USERNAME
+                    </div>
+                    <div class="panel-body">
+                        <form id="setNick">
+                            <div id="nickGroup" class="input-group">
+                                <input id="nickName" type="text" class="form-control" placeholder="Enter Message"/>
+                                <span class="input-group-btn">
+                                <button class="btn btn-info" type="submit">Enter</button>
+                            </span>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="contentWrap">
+            <h3 class="text-center"> Chat Application </h3>
+            <br/><br/>
+            <div class="col-md-8">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        General
+                    </div>
+                    <div class="panel-body fixed-panel messagesDiv">
+                        <ul id="chat">
+
+                        </ul>
+                    </div>
+                    <div class="panel-footer">
+                        <form id="send-message">
+                            <div class="input-group">
+                                <input id="message" type="text" class="form-control" placeholder="Enter Message"/>
+                                <span class="input-group-btn">
+                                     <button class="btn btn-success" type="submit">SEND</button>
+                                 </span>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="panel panel-warning">
+                    <div class="panel-heading">
+                        ONLINE USERS
+                    </div>
+                    <div class="panel-body fixed-panel">
+                        <ul id="users">
+
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/paper/bootstrap.min.css"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+
+    $(document).ready(function () {
+        var socket = io.connect('http://localhost:3000');
+        var $nickForm = $('#setNick');
+        var $nickBox = $('#nickName');
+        var $chat = $('#chat');
+        var $messageForm = $('#send-message');
+        var $messageBox = $('#message');
+        var $users = $('#users');
+
+
+
+        $nickForm.submit(function (e) {
+            e.preventDefault();
+            socket.emit('new user', $nickBox.val(), function (data) {
+                if (data) {
+                    $('#nickWrap').hide();
+                    $('#contentWrap').show();
+                } else {
+                    $('#nickGroup').addClass('has-error');
+                }
+            });
+            $nickBox.val('');
+        });
+
+        $messageForm.submit(function (e) {
+            e.preventDefault();
+            socket.emit('new message', $messageBox.val(),function (err) {
+                if(err){
+                    $chat.append("<li><b>"+err+"</b></li>");
+                    $(".messagesDiv").animate({ scrollTop: $("#chat")[0].scrollHeight }, 1000);
+                }
+            });
+            $messageBox.val('');
+        });
+
+        //old messages
+        socket.on('old messages',function (data) {
+            data.forEach(function (item) {
+                $chat.append("<li><b>" + item.nick + "</b> :" + item.msg + "</li><hr/>");
+            });
+            $(".messagesDiv").animate({ scrollTop: $("#chat")[0].scrollHeight }, 1000);
+        });
+
+        //new message 'general'
+        socket.on('general message', function (data) {
+            $chat.append("<li><b>" + data.nick + "</b> :" + data.msg + "</li><hr/>");
+            $(".messagesDiv").animate({ scrollTop: $("#chat")[0].scrollHeight }, 1000);
+        });
+
+        //new message 'private'
+        socket.on('private message', function (data) {
+            $chat.append("<li class='private'><b>" + data.nick + "</b> :" + data.msg + "</li><hr/>");
+            $(".messagesDiv").animate({ scrollTop: $("#chat")[0].scrollHeight }, 1000);
+        });
+
+
+        //new user has joined
+        socket.on('username', function (data) {
+            var html = '';
+            data.forEach(function (item) {
+                html +="<li>" + item + "</li>";
+            });
+            $users.html(html);
+        });
+
+        socket.on('userdisconnect', function (data) {
+            $chat.append("<li style='color: brown'> user <b>" + data + "</b> disconnected </li>");
+        });
+    });
+</script>
+</html>

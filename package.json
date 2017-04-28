@@ -1,0 +1,19 @@
+{
+  "name": "chatapp",
+  "version": "1.0.0",
+  "description": "simple chat application using node.js socket.io and mongoDB",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "chat"
+  ],
+  "author": "moutasem abdullatif",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.15.2",
+    "mongoose": "^4.9.6",
+    "socket.io": "^1.7.3"
+  }
+}
