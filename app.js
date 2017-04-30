@@ -4,10 +4,11 @@ var express = require('express'),
     io = require('socket.io').listen(server),
     mongoose = require('mongoose'),
     path = require('path'),
-    users = {};
+    users = {},
+    port = process.env.PORT || 3000;
 
-server.listen(3000, function () {
-    console.log('listening to *:3000...');
+server.listen(port, function () {
+    console.log('listening to *: %d...',port);
 });
 
 mongoose.connect('mongodb://localhost/chat', function (err) {
