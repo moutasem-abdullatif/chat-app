@@ -2,9 +2,9 @@
   "name": "chatapp",
   "version": "1.0.0",
   "description": "simple chat application using node.js socket.io and mongoDB",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js"
   },
   "keywords": [
     "chat"
